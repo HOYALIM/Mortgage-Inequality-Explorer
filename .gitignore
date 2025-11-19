@@ -1,0 +1,32 @@
+# Large data files
+hmda_processed_2018_2023.csv
+hmda_tract_*.csv
+*.csv
+
+# Except small configuration files
+!fred_yearly_2018_2023.csv
+!inequality_metrics_2018_2023.csv
+!county_data_2018_2023.csv
+!county_data_2023.csv
+!MORTGAGE30US.csv
+!UNRATE.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
