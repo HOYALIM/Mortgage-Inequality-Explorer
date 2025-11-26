@@ -314,7 +314,7 @@
     <div class="container">
         <header>
             <h1>🏠 Mortgage Inequality Explorer</h1>
-            <p class="subtitle">Interactive County-Level Loan Portfolio Analysis (2018-2023)</p>
+            <p class="subtitle">Interactive County-Level Loan Portfolio Analysis (2018-2021)</p>
             <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">
                 <span id="theme-icon">🌙</span>
                 <span id="theme-text">Dark</span>
@@ -372,7 +372,7 @@
     </div>
 
     <script>
-        let currentYear = 2023;
+        let currentYear = 2021;
         let countyDataByYear = new Map();
         let tractDataByYear = new Map();
         let selectedCountyFips = null;
@@ -412,15 +412,16 @@
             d3.csv("hmda_tract_2018.csv"),
             d3.csv("hmda_tract_2019.csv"),
             d3.csv("hmda_tract_2020.csv"),
-            d3.csv("hmda_tract_2021.csv"),
-            d3.csv("hmda_tract_2022.csv"),
-            d3.csv("hmda_tract_2023.csv")
+            d3.csv("hmda_tract_2021.csv")
         ]).then(([countyData, ...tractDataArrays]) => {
             console.log("Data loaded successfully");
             
             // Process county data
             countyData.forEach(d => {
                 const year = +d.year;
+                if (year === 2022 || year === 2023) {
+                    return; 
+                }
                 if (!countyDataByYear.has(year)) {
                     countyDataByYear.set(year, new Map());
                 }
@@ -431,7 +432,7 @@
             });
 
             // Process tract data by year
-            const years = [2018, 2019, 2020, 2021, 2022, 2023];
+            const years = [2018, 2019, 2020, 2021];
             tractDataArrays.forEach((tractData, idx) => {
                 const year = years[idx];
                 const processed = tractData.map(d => {

@@ -130,66 +130,142 @@
             border-radius: 3px;
             font-family: 'Courier New', monospace;
         }
+
+        .dataset-btn {
+            display: inline-block;
+            margin-top: 8px;
+            margin-right: 8px;
+            padding: 8px 14px;
+            background: #f1c40f;
+            color: #2c3e50;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .dataset-btn:hover {
+            background: #d4ac0d;
+        }
+
+        .writeup-box {
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f9fafb;
+            border: 1px solid #dcdfe3;
+        }
+
+        .writeup-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #2c3e50;
+        }
+
+        .writeup-section-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 10px;
+            margin-bottom: 6px;
+            color: #34495e;
+        }
+
+        .writeup-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #444;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="emoji">🏠</div>
-        <h1>Mortgage Inequality Explorer</h1>
-        <p class="subtitle">Interactive County-Level Loan Portfolio Analysis (2018-2023)</p>
+    <body>
+        <div class="container">
+            <div class="emoji">🏠</div>
+            <h1>Mortgage Inequality Explorer</h1>
+            <p class="subtitle">Interactive County-Level Loan Portfolio Analysis (2018-2021)</p>
+    
+            <a href="interactive_dashboard.html" class="launch-btn">
+                🚀 Launch Dashboard
+            </a>
+    
+            <div class="warning-box">
+                <div class="info-title">Team Members</div>
+                <div class="info-text">
+                    Ho Lim - A18071915 - hol050@ucsd.edu<br>
+                    Kalkidan Berhe Gebrekirstos - A18484099 - kgebrekirstos@ucsd.edu<br>
+                    Nabila Afifah Qotrunnada - A18500553 - nqotrunnada@ucsd.edu
+                </div>
+            </div>
 
-        <a href="interactive_dashboard.html" class="launch-btn">
-            🚀 Launch Dashboard
-        </a>
-
-        <div class="warning-box">
-            <strong>⚠️ Important:</strong> This dashboard requires a local server to work properly. 
-            If the dashboard doesn't load, please use the <code>start_dashboard.command</code> file.
+            <div class="info-box">
+                <div class="info-title">Dataset</div>
+                <div class="info-text">
+                    <p>
+                        Urban Institute HMDA Neighborhood Summary Files, Census Tract Level, 2018 to 2021.
+                    </p>
+                    <a 
+                        href="https://datacatalog.urban.org/dataset/home-mortgage-disclosure-act-neighborhood-summary-files-census-tract-level" 
+                        class="dataset-btn" 
+                        target="_blank"
+                    >
+                        Open Urban Institute HMDA dataset
+                    </a>
+    
+                    <p style="margin-top: 16px;">
+                        FRED Mortgage Rate Series (MORTGAGE30US).
+                    </p>
+                    <a 
+                        href="https://fred.stlouisfed.org/series/MORTGAGE30US" 
+                        class="dataset-btn" 
+                        target="_blank"
+                    >
+                        Open FRED mortgage rate series
+                    </a>
+    
+                    <p style="margin-top: 16px;">
+                        FRED Unemployment Rate (UNRATE).
+                    </p>
+                    <a 
+                        href="https://fred.stlouisfed.org/series/UNRATE" 
+                        class="dataset-btn" 
+                        target="_blank"
+                    >
+                        Open FRED unemployment series
+                    </a>
+                </div>
+            </div>
+    
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-title">🗺️ Interactive Map</div>
+                    <div class="feature-desc">Click any county to view detailed statistics</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-title">💰 Loan Distribution</div>
+                    <div class="feature-desc">Analyze loans by price range</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-title">👥 Demographics</div>
+                    <div class="feature-desc">Age and race or ethnicity breakdown</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-title">💵 Income Analysis</div>
+                    <div class="feature-desc">Distribution by income level</div>
+                </div>
+            </div>
+            <div class="writeup-box">    
+                <div class="writeup-section-title">What We Have Done So Far</div>
+                <div class="writeup-text">
+                    We have collected a dataset covering U.S. mortgage lending from 2018 to 2021, merging tract-level HMDA data with county-level economic indicators from FRED. The raw data have been cleaned and consolidated so they are ready for visualization. We created the dashboard that visualizes mortgage approval patterns, minority borrower share, and related demographic metrics across counties. The dashboard has interactive mapping, filtering, and temporal navigation, allowing users to explore variations across space and time. We organized the project files carefully to ensure portability and static hosting compatibility. Generally, we have built a working prototype that demonstrates the core functionality we want to build our final project on.
+                </div>
+    
+                <div class="writeup-section-title" style="margin-top: 14px;">What Will Be Most Challenging and Why</div>
+                <div class="writeup-text">
+                    One of the biggest challenges in the next stage of our project will be building a machine learning style feature that provides users with dynamic, data-driven insights based on their inputs. Implementing this requires developing an algorithm that can take information such as county, demographic patterns, or loan characteristics and compare it to historical HMDA trends in a meaningful way. Because mortgage data is sensitive and heavily imbalanced across regions and groups, creating an ML model that is fair, interpretable, and statistically sound will be difficult. Another key challenge will be integrating this predictive or smart component into the existing dashboard without slowing down the interactive map or overloading the browser with large datasets. We also need to design a clear interface so users understand how the model is generating its outputs and what assumptions it relies on. Overall, the hardest part is making a feature that feels intelligent and helpful while still being transparent, accurate, and ethically responsible.
+                </div>
+            </div>            
         </div>
-
-        <div class="info-box">
-            <div class="info-title">📖 How to Use</div>
-            <div class="info-text">
-                <strong>Method 1 (Easy):</strong><br>
-                1. Double-click <code>start_dashboard.command</code><br>
-                2. Browser will open automatically<br>
-                3. Press Ctrl+C in terminal to stop<br><br>
-
-                <strong>Method 2 (Manual):</strong><br>
-                1. Open Terminal in this folder<br>
-                2. Run: <code>python3 -m http.server 8888</code><br>
-                3. Visit: <code>http://localhost:8888/interactive_dashboard.html</code>
-            </div>
-        </div>
-
-        <div class="features">
-            <div class="feature">
-                <div class="feature-title">🗺️ Interactive Map</div>
-                <div class="feature-desc">Click any county to view detailed statistics</div>
-            </div>
-            <div class="feature">
-                <div class="feature-title">💰 Loan Distribution</div>
-                <div class="feature-desc">Analyze loans by price range</div>
-            </div>
-            <div class="feature">
-                <div class="feature-title">👥 Demographics</div>
-                <div class="feature-desc">Age and race/ethnicity breakdown</div>
-            </div>
-            <div class="feature">
-                <div class="feature-title">💵 Income Analysis</div>
-                <div class="feature-desc">Distribution by income level</div>
-            </div>
-        </div>
-
-        <div class="info-box">
-            <div class="info-title">ℹ️ Why do I need a server?</div>
-            <div class="info-text">
-                For security reasons, browsers block direct file access (<code>file://</code>) 
-                from loading CSV data files. A local HTTP server (<code>http://</code>) 
-                solves this issue while keeping everything on your computer.
-            </div>
-        </div>
-    </div>
 
     <script>
         // Auto-check if server is available
