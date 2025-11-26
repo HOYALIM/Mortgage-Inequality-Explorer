@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mortgage Inequality Explorer - Interactive Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 15px;
+            transition: background 0.3s ease;
+        }
+
+        body.dark-mode {
+            background: #1a1a1a;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            position: relative;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode header {
+            background: #2d2d2d;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 28px;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode h1 {
+            color: #ffffff;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .subtitle {
+            color: #b0b0b0;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            padding: 8px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle:hover {
+            background: #e0e0e0;
+            transform: scale(1.05);
+        }
+
+        body.dark-mode .theme-toggle {
+            background: #3d3d3d;
+            border-color: #555;
+            color: #ffffff;
+        }
+
+        body.dark-mode .theme-toggle:hover {
+            background: #4d4d4d;
+        }
+
+        .map-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            width: 100%;
+            transition: background 0.3s ease;
+        }
+
+        body.dark-mode .map-section {
+            background: #2d2d2d;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.15);
+            position: relative;
+            transition: background 0.3s ease;
+        }
+
+        body.dark-mode .chart-card {
+            background: #2d2d2d;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #667eea;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .chart-title {
+            color: #ffffff;
+        }
+
+        .chart-insight {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-top: 12px;
+            padding: 12px 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+            line-height: 1.5;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode .chart-insight {
+            background: #1e3a5f;
+            color: #e3f2fd;
+            border-left-color: #64b5f6;
+        }
+
+        .county-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            transition: background 0.3s ease;
+        }
+
+        body.dark-mode .county-info {
+            background: linear-gradient(135deg, #1e3a8a 0%, #581c87 100%);
+        }
+
+        .county-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .county-details {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .placeholder {
+            text-align: center;
+            padding: 50px 20px;
+            color: #95a5a6;
+        }
+
+        .placeholder-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        #loading {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats-box {
+            display: flex;
+            justify-content: space-around;
+            background: #ecf0f1;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-top: 3px;
+        }
+
+        .instruction {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 13px;
+            color: #856404;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode .instruction {
+            background: #3d3d2d;
+            border-left-color: #ffa000;
+            color: #ffd54f;
+        }
+
+        .correlation-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            margin-top: 30px;
+            transition: background 0.3s ease;
+        }
+
+        body.dark-mode .correlation-section {
+            background: #2d2d2d;
+        }
+
+        .correlation-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .correlation-title {
+            color: #ffffff;
+        }
+
+        .correlation-subtitle {
+            font-size: 14px;
+            color: #7f8c8d;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .correlation-subtitle {
+            color: #b0b0b0;
+        }
+
+        #correlation-container {
+            min-height: 500px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏠 Mortgage Inequality Explorer</h1>
+            <p class="subtitle">Interactive County-Level Loan Portfolio Analysis (2018-2023)</p>
+            <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">
+                <span id="theme-icon">🌙</span>
+                <span id="theme-text">Dark</span>
+            </button>
+        </header>
+
+        <div class="instruction">
+            👆 <strong>Click on any county</strong> in the map to view detailed borrower statistics in the 4 charts below
+        </div>
+
+        <!-- Map Section (Full Width) -->
+        <div class="map-section">
+            <div id="loading">
+                <div class="spinner"></div>
+                <p>Loading map and data...</p>
+            </div>
+            <div id="map-container"></div>
+        </div>
+
+        <!-- Charts Section (2x2 Grid) -->
+        <div class="charts-grid">
+            <div class="chart-card" id="loan-amount-card">
+                <div class="chart-title">💰 Loan Amount Distribution</div>
+                <div id="loan-amount-chart"></div>
+                <div id="loan-insight" class="chart-insight" style="display: none;"></div>
+            </div>
+
+            <div class="chart-card" id="age-card">
+                <div class="chart-title">👥 Age Distribution</div>
+                <div id="age-chart"></div>
+                <div id="age-insight" class="chart-insight" style="display: none;"></div>
+            </div>
+
+            <div class="chart-card" id="race-card">
+                <div class="chart-title">🌍 Race/Ethnicity</div>
+                <div id="race-chart"></div>
+                <div id="race-insight" class="chart-insight" style="display: none;"></div>
+            </div>
+
+            <div class="chart-card" id="income-card">
+                <div class="chart-title">💵 Income Level</div>
+                <div id="income-chart"></div>
+                <div id="income-insight" class="chart-insight" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div id="county-info-display"></div>
+
+        <!-- Correlation Heatmap Section -->
+        <div class="correlation-section" id="correlation-section" style="display: none;">
+            <div class="correlation-title">🔥 Race × Income Correlation Analysis</div>
+            <div class="correlation-subtitle">Explore the relationship between racial demographics and income levels in mortgage lending</div>
+            <div id="correlation-container"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentYear = 2023;
+        let countyDataByYear = new Map();
+        let tractDataByYear = new Map();
+        let selectedCountyFips = null;
+
+        // Theme toggle function
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Load saved theme preference
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('theme-icon').textContent = '☀️';
+                document.getElementById('theme-text').textContent = 'Light';
+            }
+        });
+
+        // Load all data
+        Promise.all([
+            d3.csv("county_data_2018_2023.csv"),
+            d3.csv("hmda_tract_2018.csv"),
+            d3.csv("hmda_tract_2019.csv"),
+            d3.csv("hmda_tract_2020.csv"),
+            d3.csv("hmda_tract_2021.csv"),
+            d3.csv("hmda_tract_2022.csv"),
+            d3.csv("hmda_tract_2023.csv")
+        ]).then(([countyData, ...tractDataArrays]) => {
+            console.log("Data loaded successfully");
+            
+            // Process county data
+            countyData.forEach(d => {
+                const year = +d.year;
+                if (!countyDataByYear.has(year)) {
+                    countyDataByYear.set(year, new Map());
+                }
+                countyDataByYear.get(year).set(d.county_fips, {
+                    minorityShare: +d.minority_share,
+                    originations: +d.owner_purchase_originations
+                });
+            });
+
+            // Process tract data by year
+            const years = [2018, 2019, 2020, 2021, 2022, 2023];
+            tractDataArrays.forEach((tractData, idx) => {
+                const year = years[idx];
+                const processed = tractData.map(d => {
+                    const geo = d.geo2010 || '';
+                    return {
+                        ...d,
+                        county_fips: geo.substring(0, 5),
+                        year: year
+                    };
+                });
+                tractDataByYear.set(year, processed);
+            });
+
+            createMap();
+        }).catch(error => {
+            console.error("Error loading data:", error);
+            document.getElementById('loading').innerHTML = 
+                '<p style="color: red;">Error loading data. Please check the console.</p>';
+        });
+
+        function createMap() {
+            document.getElementById('loading').style.display = 'none';
+
+            const years = Array.from(countyDataByYear.keys()).sort();
+            const frames = [];
+            
+            years.forEach(year => {
+                const yearData = countyDataByYear.get(year);
+                const fips = Array.from(yearData.keys());
+                const values = fips.map(f => yearData.get(f).minorityShare);
+                
+                frames.push({
+                    name: year.toString(),
+                    data: [{
+                        type: 'choropleth',
+                        locationmode: 'geojson-id',
+                        geojson: 'https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json',
+                        locations: fips,
+                        z: values,
+                        colorscale: 'YlOrRd',
+                        zmin: 0,
+                        zmax: 1,
+                        marker: {
+                            line: {
+                                color: 'white',
+                                width: 0.3
+                            }
+                        },
+                        colorbar: {
+                            title: 'Minority<br>Share',
+                            tickformat: '.0%',
+                            len: 0.5
+                        },
+                        hovertemplate: '<b>County: %{location}</b><br>' +
+                                       'Minority Share: %{z:.1%}<br>' +
+                                       '<extra></extra>'
+                    }]
+                });
+            });
+
+            const layout = {
+                title: {
+                    text: 'Minority Borrower Share by County',
+                    font: {size: 22, color: '#2c3e50'},
+                    x: 0.5,
+                    xanchor: 'center'
+                },
+                geo: {
+                    scope: 'usa',
+                    showlakes: true,
+                    lakecolor: 'rgb(240,248,255)',
+                    projection: {type: 'albers usa'}
+                },
+                height: 600,
+                margin: {t: 60, b: 60, l: 10, r: 10},
+                dragmode: 'zoom',
+                sliders: [{
+                    active: years.length - 1,
+                    steps: years.map(year => ({
+                        label: year.toString(),
+                        method: 'animate',
+                        args: [[year.toString()], {
+                            mode: 'immediate',
+                            transition: {duration: 300},
+                            frame: {duration: 300}
+                        }]
+                    })),
+                    x: 0.1,
+                    len: 0.85,
+                    currentvalue: {
+                        visible: true,
+                        prefix: 'Year: ',
+                        font: {size: 16, color: '#2c3e50', weight: 'bold'}
+                    }
+                }],
+                updatemenus: [{
+                    type: 'buttons',
+                    showactive: false,
+                    x: 0.05,
+                    y: 0,
+                    xanchor: 'left',
+                    yanchor: 'top',
+                    buttons: [{
+                        label: '▶ Play',
+                        method: 'animate',
+                        args: [null, {
+                            fromcurrent: true,
+                            frame: {duration: 1500},
+                            transition: {duration: 300}
+                        }]
+                    }, {
+                        label: '⏸ Pause',
+                        method: 'animate',
+                        args: [[null], {
+                            mode: 'immediate',
+                            frame: {duration: 0}
+                        }]
+                    }]
+                }]
+            };
+
+            const config = {
+                scrollZoom: true,
+                displayModeBar: true,
+                modeBarButtonsToAdd: ['zoom2d', 'pan2d', 'zoomIn2d', 'zoomOut2d', 'resetScale2d'],
+                responsive: true
+            };
+
+            Plotly.newPlot('map-container', frames[frames.length - 1].data, layout, config)
+                .then(gd => {
+                    Plotly.addFrames('map-container', frames);
+                    
+                    // Click event
+                    gd.on('plotly_click', function(data) {
+                        if (data.points.length > 0) {
+                            const countyFips = data.points[0].location;
+                            selectedCountyFips = countyFips;
+                            updateAllCharts(countyFips, currentYear);
+                        }
+                    });
+
+                    // Track year changes
+                    gd.on('plotly_sliderchange', function(data) {
+                        const yearIndex = data.slider.active;
+                        const years = Array.from(countyDataByYear.keys()).sort();
+                        currentYear = years[yearIndex];
+                        if (selectedCountyFips) {
+                            updateAllCharts(selectedCountyFips, currentYear);
+                        }
+                    });
+                });
+        }
+
+        function updateAllCharts(countyFips, year) {
+            const tractData = tractDataByYear.get(year).filter(d => d.county_fips === countyFips);
+            
+            if (tractData.length === 0) {
+                showNoDataMessage(countyFips, year);
+                return;
+            }
+
+            // Update county info
+            updateCountyInfo(countyFips, year, tractData);
+
+            // Update all 4 charts
+            updateLoanAmountChart(tractData);
+            updateAgeChart(tractData);
+            updateRaceChart(tractData);
+            updateIncomeChart(tractData);
+            
+            // Update correlation heatmap
+            updateCorrelationHeatmap(tractData, countyFips, year);
+        }
+
+        function updateCountyInfo(fips, year, tractData) {
+            const totalLoans = d3.sum(tractData, d => +(d.owner_purchase_originations || 0));
+            const avgLoanAmount = d3.mean(tractData, d => +(d.owner_loan_amount_median || 0));
+            
+            const html = `
+                <div class="county-info">
+                    <div class="county-name">County: ${fips}</div>
+                    <div class="county-details">
+                        Year: ${year} | ${tractData.length} Census Tracts | 
+                        ${totalLoans.toLocaleString()} Total Originations | 
+                        Avg Loan: $${avgLoanAmount.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                    </div>
+                </div>
+            `;
+            document.getElementById('county-info-display').innerHTML = html;
+        }
+
+        function updateLoanAmountChart(tractData) {
+            const bins = [0, 100000, 200000, 300000, 400000, 1000000];
+            const labels = ['$0-100k', '$100-200k', '$200-300k', '$300-400k', '$400k+'];
+            
+            const borrowers = [];
+            const amounts = [];
+            const percentages = [];
+            
+            for (let i = 0; i < bins.length - 1; i++) {
+                const filtered = tractData.filter(d => {
+                    const amt = +(d.owner_loan_amount_median || 0);
+                    return amt >= bins[i] && amt < bins[i+1];
+                });
+                const count = d3.sum(filtered, d => +(d.owner_purchase_originations || 0));
+                const avgLoan = d3.mean(filtered, d => +(d.owner_loan_amount_median || 0)) || 0;
+                borrowers.push(count);
+                amounts.push(count * avgLoan);
+            }
+
+            const totalBorrowers = d3.sum(borrowers);
+            const totalAmount = d3.sum(amounts);
+            
+            // Calculate percentages
+            amounts.forEach((amt, i) => {
+                percentages.push((amt / totalAmount * 100).toFixed(1));
+            });
+
+            const data = [{
+                x: labels,
+                y: amounts,
+                type: 'bar',
+                marker: {
+                    color: ['#0d47a1', '#1565c0', '#1976d2', '#1e88e5', '#42a5f5'],
+                    line: {color: 'white', width: 1.5}
+                },
+                text: percentages.map(p => p + '%'),
+                textposition: 'outside',
+                hovertemplate: '<b>%{x}</b><br>' +
+                              'Total Amount: $%{y:,.0f}<br>' +
+                              'Borrowers: %{customdata:,.0f}<br>' +
+                              'Percentage: %{text}<br>' +
+                              '<extra></extra>',
+                customdata: borrowers
+            }];
+
+            const layout = {
+                height: 320,
+                margin: {t: 30, b: 60, l: 70, r: 20},
+                xaxis: {title: 'Price Range'},
+                yaxis: {
+                    title: 'Total Loan Amount ($)',
+                    titlefont: {size: 12},
+                    tickformat: '$.2s'
+                },
+                showlegend: false
+            };
+
+            Plotly.newPlot('loan-amount-chart', data, layout, {responsive: true});
+            
+            const maxIdx = amounts.indexOf(Math.max(...amounts));
+            const insight = maxIdx < 2 ? 
+                `Most loan volume in lower-priced homes (${labels[maxIdx]}: ${percentages[maxIdx]}%)` :
+                `Mid-to-high priced homes dominate (${labels[maxIdx]}: ${percentages[maxIdx]}%)`;
+            
+            document.getElementById('loan-insight').style.display = 'block';
+            document.getElementById('loan-insight').textContent = 
+                `${insight} | Total: ${totalBorrowers.toLocaleString()} borrowers, $${(totalAmount/1e6).toFixed(1)}M`;
+        }
+
+        function updateAgeChart(tractData) {
+            const ageData = {
+                '18-34': d3.sum(tractData, d => +(d.age_younger_purchase || 0)),
+                '35-44': d3.sum(tractData, d => +(d.age_middleyounger_purchase || 0)),
+                '45-54': d3.sum(tractData, d => +(d.age_middleolder_purchase || 0)),
+                '55+': d3.sum(tractData, d => +(d.age_older_purchase || 0))
+            };
+
+            const total = Object.values(ageData).reduce((a,b) => a+b, 0);
+            const avgLoan = d3.mean(tractData, d => +(d.owner_loan_amount_median || 0)) || 0;
+
+            const data = [{
+                labels: Object.keys(ageData),
+                values: Object.values(ageData),
+                type: 'pie',
+                marker: {colors: ['#0d47a1', '#1976d2', '#42a5f5', '#90caf9']},
+                textinfo: 'label+percent',
+                textposition: 'inside',
+                hole: 0.3
+            }];
+
+            const layout = {
+                height: 320,
+                margin: {t: 20, b: 20, l: 20, r: 20},
+                showlegend: false
+            };
+
+            Plotly.newPlot('age-chart', data, layout, {responsive: true});
+
+            const maxAge = Object.keys(ageData).reduce((a, b) => ageData[a] > ageData[b] ? a : b);
+            const maxPct = (ageData[maxAge] / total * 100).toFixed(1);
+            
+            document.getElementById('age-insight').style.display = 'block';
+            document.getElementById('age-insight').textContent = 
+                `Dominant: ${maxAge} (${maxPct}%) | Total: ${total.toLocaleString()} borrowers, $${(total*avgLoan/1e6).toFixed(1)}M`;
+        }
+
+        function updateRaceChart(tractData) {
+            const raceData = {
+                'White': d3.sum(tractData, d => +(d.race_white_purchase || 0)),
+                'Black': d3.sum(tractData, d => +(d.race_black_purchase || 0)),
+                'Hispanic': d3.sum(tractData, d => +(d.race_hispanic_purchase || 0)),
+                'Asian': d3.sum(tractData, d => +(d.race_asian_purchase || 0)),
+                'Other': d3.sum(tractData, d => +(d.race_other_purchase || 0))
+            };
+
+            const total = Object.values(raceData).reduce((a,b) => a+b, 0);
+            const percentages = Object.values(raceData).map(v => (v/total*100).toFixed(1));
+            const avgLoan = d3.mean(tractData, d => +(d.owner_loan_amount_median || 0)) || 0;
+
+            const data = [{
+                x: Object.keys(raceData),
+                y: percentages,
+                type: 'bar',
+                marker: {color: ['#0d47a1', '#1565c0', '#1976d2', '#1e88e5', '#42a5f5']},
+                text: percentages.map(p => p + '%'),
+                textposition: 'outside'
+            }];
+
+            const layout = {
+                height: 320,
+                margin: {t: 20, b: 60, l: 40, r: 20},
+                xaxis: {title: ''},
+                yaxis: {title: 'Percentage (%)', range: [0, Math.max(...percentages) * 1.2]}
+            };
+
+            Plotly.newPlot('race-chart', data, layout, {responsive: true});
+
+            const maxRace = Object.keys(raceData).reduce((a, b) => raceData[a] > raceData[b] ? a : b);
+            const maxPct = (raceData[maxRace] / total * 100).toFixed(1);
+            
+            document.getElementById('race-insight').style.display = 'block';
+            document.getElementById('race-insight').textContent = 
+                `Largest: ${maxRace} (${maxPct}%) | Total: ${total.toLocaleString()} borrowers, $${(total*avgLoan/1e6).toFixed(1)}M`;
+        }
+
+        function updateIncomeChart(tractData) {
+            const incomeData = {
+                'Very Low': d3.sum(tractData, d => +(d.income_verylow_purchase || 0)),
+                'Low': d3.sum(tractData, d => +(d.income_low_purchase || 0)),
+                'Moderate': d3.sum(tractData, d => +(d.income_moderate_purchase || 0)),
+                'High': d3.sum(tractData, d => +(d.income_high_purchase || 0))
+            };
+
+            const loans = Object.values(incomeData);
+            const avgLoan = d3.mean(tractData, d => +(d.owner_loan_amount_median || 0)) || 0;
+            const amounts = loans.map(l => l * avgLoan);
+            
+            const totalLoans = loans.reduce((a,b) => a+b, 0);
+            const totalAmount = amounts.reduce((a,b) => a+b, 0);
+            
+            // Calculate percentages
+            const percentages = amounts.map(amt => (amt / totalAmount * 100).toFixed(1));
+
+            const data = [{
+                x: Object.keys(incomeData),
+                y: amounts,
+                type: 'bar',
+                marker: {
+                    color: ['#0d47a1', '#1565c0', '#1976d2', '#42a5f5'],
+                    line: {color: 'white', width: 1.5}
+                },
+                text: percentages.map(p => p + '%'),
+                textposition: 'outside',
+                hovertemplate: '<b>%{x} Income</b><br>' +
+                              'Total Amount: $%{y:,.0f}<br>' +
+                              'Number of Loans: %{customdata:,.0f}<br>' +
+                              'Percentage: %{text}<br>' +
+                              '<extra></extra>',
+                customdata: loans
+            }];
+
+            const layout = {
+                height: 320,
+                margin: {t: 30, b: 60, l: 70, r: 20},
+                xaxis: {title: 'Income Level'},
+                yaxis: {
+                    title: 'Total Loan Amount ($)',
+                    titlefont: {size: 12},
+                    tickformat: '$.2s'
+                },
+                showlegend: false
+            };
+
+            Plotly.newPlot('income-chart', data, layout, {responsive: true});
+
+            const maxIdx = amounts.indexOf(Math.max(...amounts));
+            const maxIncome = Object.keys(incomeData)[maxIdx];
+            const maxPct = percentages[maxIdx];
+            
+            document.getElementById('income-insight').style.display = 'block';
+            document.getElementById('income-insight').textContent = 
+                `Dominant: ${maxIncome} (${maxPct}%) | Total: ${totalLoans.toLocaleString()} loans, $${(totalAmount/1e6).toFixed(1)}M`;
+        }
+
+        function showNoDataMessage(fips, year) {
+            // Clear all charts
+            ['loan-amount-chart', 'age-chart', 'race-chart', 'income-chart'].forEach(id => {
+                document.getElementById(id).innerHTML = '';
+            });
+            
+            // Hide all insights
+            ['loan-insight', 'age-insight', 'race-insight', 'income-insight'].forEach(id => {
+                document.getElementById(id).style.display = 'none';
+            });
+            
+            // Show message in county info
+            document.getElementById('county-info-display').innerHTML = `
+                <div class="county-info">
+                    <div class="county-name">❌ No Data Available</div>
+                    <div class="county-details">County ${fips} has no data for year ${year}</div>
+                </div>
+            `;
+            
+            // Hide correlation section
+            document.getElementById('correlation-section').style.display = 'none';
+        }
+
+        function updateCorrelationHeatmap(tractData, countyFips, year) {
+            // Show correlation section
+            document.getElementById('correlation-section').style.display = 'block';
+            
+            // Calculate Race × Income correlation matrix
+            const races = ['White', 'Black', 'Hispanic', 'Asian'];
+            const incomes = ['Very Low', 'Low', 'Moderate', 'High'];
+            
+            // Build data matrix with actual counts
+            const matrix = [];
+            const textMatrix = [];
+            
+            races.forEach(race => {
+                const row = [];
+                const textRow = [];
+                incomes.forEach(income => {
+                    // Map to column names
+                    const colName = `race_${race.toLowerCase()}_income_${income.toLowerCase().replace(' ', '')}`;
+                    const value = d3.sum(tractData, d => +(d[colName] || 0));
+                    row.push(value);
+                });
+                
+                // Calculate percentages for this race
+                const rowSum = d3.sum(row);
+                row.forEach(val => {
+                    const pct = rowSum > 0 ? (val / rowSum * 100) : 0;
+                    textRow.push(pct.toFixed(1) + '%');
+                });
+                
+                matrix.push(row.map(val => rowSum > 0 ? (val / rowSum * 100) : 0));
+                textMatrix.push(textRow);
+            });
+
+            // Create heatmap with text annotations
+            const data = [{
+                z: matrix,
+                x: incomes,
+                y: races,
+                type: 'heatmap',
+                colorscale: [
+                    [0, '#f7fbff'],      // Very light blue (low)
+                    [0.25, '#c6dbef'],   // Light blue
+                    [0.5, '#6baed6'],    // Medium blue
+                    [0.75, '#2171b5'],   // Dark blue
+                    [1, '#08306b']       // Very dark blue (high)
+                ],
+                zmin: 0,
+                zmax: 100,
+                text: textMatrix,
+                texttemplate: '%{text}',
+                textfont: {
+                    size: 14,
+                    color: 'black',
+                    family: 'Arial, sans-serif'
+                },
+                hovertemplate: '<b>%{y} × %{x} Income</b><br>' +
+                              'Share: %{z:.1f}%<br>' +
+                              '<extra></extra>',
+                colorbar: {
+                    title: {
+                        text: 'Share<br>(%)',
+                        side: 'right'
+                    },
+                    ticksuffix: '%',
+                    len: 0.6,
+                    thickness: 20
+                }
+            }];
+
+            const layout = {
+                title: {
+                    text: `Race × Income Distribution Matrix - County ${countyFips} (${year})`,
+                    font: {size: 20, color: '#2c3e50'},
+                    x: 0.5,
+                    xanchor: 'center'
+                },
+                xaxis: {
+                    title: {
+                        text: 'Income Level',
+                        font: {size: 14, color: '#2c3e50'}
+                    },
+                    side: 'bottom',
+                    tickfont: {size: 13}
+                },
+                yaxis: {
+                    title: {
+                        text: 'Race/Ethnicity',
+                        font: {size: 14, color: '#2c3e50'}
+                    },
+                    tickfont: {size: 13},
+                    autorange: 'reversed'
+                },
+                height: 500,
+                margin: {t: 80, b: 80, l: 120, r: 120},
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)'
+            };
+
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                displaylogo: false
+            };
+
+            Plotly.newPlot('correlation-container', data, layout, config);
+
+            // Generate insight
+            const flatMatrix = matrix.flat();
+            const maxValue = Math.max(...flatMatrix);
+            const maxIdx = flatMatrix.indexOf(maxValue);
+            const maxRaceIdx = Math.floor(maxIdx / incomes.length);
+            const maxIncomeIdx = maxIdx % incomes.length;
+            
+            // Find min for contrast
+            const minValue = Math.min(...flatMatrix.filter(v => v > 0));
+            const minIdx = flatMatrix.indexOf(minValue);
+            const minRaceIdx = Math.floor(minIdx / incomes.length);
+            const minIncomeIdx = minIdx % incomes.length;
+            
+            const insight = document.createElement('div');
+            insight.className = 'chart-insight';
+            insight.style.marginTop = '20px';
+            insight.style.fontSize = '16px';
+            insight.style.textAlign = 'center';
+            insight.innerHTML = `
+                <strong>💡 Key Pattern:</strong> ${races[maxRaceIdx]} borrowers are most concentrated in 
+                <strong>${incomes[maxIncomeIdx]}</strong> income level (<strong>${maxValue.toFixed(1)}%</strong>) | 
+                Least in: ${races[minRaceIdx]} × ${incomes[minIncomeIdx]} (${minValue.toFixed(1)}%)
+            `;
+            
+            const container = document.getElementById('correlation-container');
+            const existingInsight = container.parentElement.querySelector('.chart-insight');
+            if (existingInsight) {
+                existingInsight.remove();
+            }
+            container.parentElement.appendChild(insight);
+        }
+    </script>
+</body>
+</html>
+

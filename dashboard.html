@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mortgage Inequality Dashboard - Interactive Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .map-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .details-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            max-height: 700px;
+            overflow-y: auto;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .chart-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .chart-insight {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            font-style: italic;
+            padding: 8px;
+            background: #fff;
+            border-radius: 5px;
+            border-left: 3px solid #3498db;
+        }
+
+        .placeholder {
+            text-align: center;
+            padding: 100px 20px;
+            color: #95a5a6;
+        }
+
+        .placeholder-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .county-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .county-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .county-year {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        #loading {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏠 Mortgage Inequality Dashboard</h1>
+            <p class="subtitle">Interactive Analysis of U.S. Mortgage Access Patterns (2018-2023)</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Map Section -->
+            <div class="map-section">
+                <div id="loading">
+                    <div class="spinner"></div>
+                    <p>Loading map data...</p>
+                </div>
+                <div id="map-container"></div>
+            </div>
+
+            <!-- Details Section -->
+            <div class="details-section">
+                <div id="details-placeholder" class="placeholder">
+                    <div class="placeholder-icon">📊</div>
+                    <h3>Select a County</h3>
+                    <p>Click on any county in the map to view detailed borrower statistics</p>
+                </div>
+                <div id="details-content" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentYear = 2023;
+        let countyDataByYear = new Map();
+        let tractDataByYear = new Map();
+
+        // Load data
+        Promise.all([
+            d3.csv("county_data_2018_2023.csv"),
+            d3.csv("hmda_tract_2018.csv"),
+            d3.csv("hmda_tract_2019.csv"),
+            d3.csv("hmda_tract_2020.csv"),
+            d3.csv("hmda_tract_2021.csv"),
+            d3.csv("hmda_tract_2022.csv"),
+            d3.csv("hmda_tract_2023.csv")
+        ]).then(([countyData, ...tractDataArrays]) => {
+            // Process county data
+            countyData.forEach(d => {
+                const year = +d.year;
+                if (!countyDataByYear.has(year)) {
+                    countyDataByYear.set(year, new Map());
+                }
+                countyDataByYear.get(year).set(d.county_fips, {
+                    minorityShare: +d.minority_share,
+                    originations: +d.owner_purchase_originations
+                });
+            });
+
+            // Process tract data by year
+            const years = [2018, 2019, 2020, 2021, 2022, 2023];
+            tractDataArrays.forEach((tractData, idx) => {
+                const year = years[idx];
+                tractDataByYear.set(year, tractData.map(d => ({
+                    ...d,
+                    county_fips: d.geo2010.substring(0, 5),
+                    year: year
+                })));
+            });
+
+            // Create initial map
+            createMap();
+        }).catch(error => {
+            console.error("Error loading data:", error);
+            document.getElementById('loading').innerHTML = 
+                '<p style="color: red;">Error loading data. Please check console.</p>';
+        });
+
+        function createMap() {
+            document.getElementById('loading').style.display = 'none';
+
+            // Prepare data for all years
+            const years = Array.from(countyDataByYear.keys()).sort();
+            const frames = [];
+            
+            years.forEach(year => {
+                const yearData = countyDataByYear.get(year);
+                const fips = Array.from(yearData.keys());
+                const values = fips.map(f => yearData.get(f).minorityShare);
+                
+                frames.push({
+                    name: year.toString(),
+                    data: [{
+                        type: 'choropleth',
+                        locationmode: 'geojson-id',
+                        geojson: 'https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json',
+                        locations: fips,
+                        z: values,
+                        colorscale: 'RdYlBu',
+                        reversescale: true,
+                        zmin: 0,
+                        zmax: 1,
+                        marker: {
+                            line: {
+                                color: 'white',
+                                width: 0.5
+                            }
+                        },
+                        colorbar: {
+                            title: 'Minority Share',
+                            tickformat: '.0%'
+                        },
+                        hovertemplate: '<b>County: %{location}</b><br>' +
+                                       'Minority Share: %{z:.1%}<br>' +
+                                       '<extra></extra>'
+                    }]
+                });
+            });
+
+            const layout = {
+                title: {
+                    text: 'Minority Borrower Share by County',
+                    font: {size: 20}
+                },
+                geo: {
+                    scope: 'usa',
+                    showlakes: true,
+                    lakecolor: 'rgb(255,255,255)'
+                },
+                sliders: [{
+                    active: years.length - 1,
+                    steps: years.map(year => ({
+                        label: year.toString(),
+                        method: 'animate',
+                        args: [[year.toString()], {
+                            mode: 'immediate',
+                            transition: {duration: 300},
+                            frame: {duration: 300}
+                        }]
+                    })),
+                    x: 0.1,
+                    len: 0.9,
+                    currentvalue: {
+                        visible: true,
+                        prefix: 'Year: ',
+                        xanchor: 'right',
+                        font: {size: 16, color: '#666'}
+                    }
+                }],
+                updatemenus: [{
+                    type: 'buttons',
+                    showactive: false,
+                    x: 0.1,
+                    y: 0,
+                    xanchor: 'right',
+                    yanchor: 'top',
+                    buttons: [{
+                        label: '▶ Play',
+                        method: 'animate',
+                        args: [null, {
+                            fromcurrent: true,
+                            frame: {duration: 1500},
+                            transition: {duration: 300}
+                        }]
+                    }, {
+                        label: '⏸ Pause',
+                        method: 'animate',
+                        args: [[null], {
+                            mode: 'immediate',
+                            frame: {duration: 0}
+                        }]
+                    }]
+                }]
+            };
+
+            // Set initial frame
+            Plotly.newPlot('map-container', frames[frames.length - 1].data, layout, {responsive: true})
+                .then(gd => {
+                    Plotly.addFrames('map-container', frames);
+                    
+                    // Add click event
+                    gd.on('plotly_click', function(data) {
+                        if (data.points.length > 0) {
+                            const countyFips = data.points[0].location;
+                            showCountyDetails(countyFips, currentYear);
+                        }
+                    });
+
+                    // Track current year from slider
+                    gd.on('plotly_sliderchange', function(data) {
+                        currentYear = parseInt(data.slider.active);
+                    });
+                });
+        }
+
+        function showCountyDetails(countyFips, year) {
+            // Hide placeholder, show content
+            document.getElementById('details-placeholder').style.display = 'none';
+            const detailsContent = document.getElementById('details-content');
+            detailsContent.style.display = 'block';
+
+            // Get tract data for this county and year
+            const tractData = tractDataByYear.get(year).filter(d => d.county_fips === countyFips);
+            
+            if (tractData.length === 0) {
+                detailsContent.innerHTML = `
+                    <div class="info-box">
+                        <strong>No data available for County ${countyFips} in ${year}</strong>
+                    </div>
+                `;
+                return;
+            }
+
+            // County header
+            let html = `
+                <div class="county-header">
+                    <div class="county-name">County: ${countyFips}</div>
+                    <div class="county-year">Year: ${year} | ${tractData.length} Census Tracts</div>
+                </div>
+                <div class="chart-grid">
+            `;
+
+            detailsContent.innerHTML = html + '</div>';
+
+            // Create charts
+            createLoanAmountChart(tractData);
+            createAgeDistributionChart(tractData);
+            createRaceDistributionChart(tractData);
+            createIncomeDistributionChart(tractData);
+        }
+
+        function createLoanAmountChart(tractData) {
+            // Aggregate loan amounts into ranges
+            const ranges = [
+                {label: '$0-100k', min: 0, max: 100000},
+                {label: '$100-200k', min: 100000, max: 200000},
+                {label: '$200-300k', min: 200000, max: 300000},
+                {label: '$300-400k', min: 300000, max: 400000},
+                {label: '$400k+', min: 400000, max: Infinity}
+            ];
+
+            const counts = ranges.map(range => {
+                return tractData.filter(d => {
+                    const amount = +d.owner_loan_amount_median;
+                    return amount >= range.min && amount < range.max;
+                }).length;
+            });
+
+            const insight = counts.indexOf(Math.max(...counts)) < 2 ? 
+                "대부분의 대출이 저가 주택에 집중되어 있습니다." : 
+                "중고가 이상 주택 대출이 상당한 비중을 차지합니다.";
+
+            const chartHtml = `
+                <div class="chart-card">
+                    <div class="chart-title">💰 Loan Amount Distribution</div>
+                    <div class="chart-insight">${insight}</div>
+                    <div id="loan-amount-chart"></div>
+                </div>
+            `;
+            
+            document.querySelector('.chart-grid').innerHTML += chartHtml;
+
+            const data = [{
+                type: 'bar',
+                x: ranges.map(r => r.label),
+                y: counts,
+                marker: {
+                    color: '#667eea',
+                    line: {color: '#4c5fd5', width: 1.5}
+                }
+            }];
+
+            const layout = {
+                margin: {t: 10, b: 40, l: 40, r: 10},
+                height: 250,
+                xaxis: {title: 'Loan Amount Range'},
+                yaxis: {title: 'Number of Tracts'}
+            };
+
+            Plotly.newPlot('loan-amount-chart', data, layout, {responsive: true});
+        }
+
+        function createAgeDistributionChart(tractData) {
+            const ageGroups = {
+                '18-34': 'age_younger_purchase',
+                '35-44': 'age_middleyounger_purchase',
+                '45-54': 'age_middleolder_purchase',
+                '55+': 'age_older_purchase'
+            };
+
+            const totals = Object.keys(ageGroups).map(label => {
+                return d3.sum(tractData, d => +(d[ageGroups[label]] || 0));
+            });
+
+            const maxIdx = totals.indexOf(Math.max(...totals));
+            const insight = maxIdx === 0 ? 
+                "청년층(18-34세)의 대출 비중이 가장 높습니다." :
+                maxIdx === 3 ? "55세 이상 중장년층의 대출이 두드러집니다." :
+                "중년층(35-54세)이 주요 대출자 그룹입니다.";
+
+            const chartHtml = `
+                <div class="chart-card">
+                    <div class="chart-title">👥 Age Distribution</div>
+                    <div class="chart-insight">${insight}</div>
+                    <div id="age-chart"></div>
+                </div>
+            `;
+            
+            document.querySelector('.chart-grid').innerHTML += chartHtml;
+
+            const data = [{
+                type: 'pie',
+                labels: Object.keys(ageGroups),
+                values: totals,
+                hole: 0.4,
+                marker: {
+                    colors: ['#667eea', '#764ba2', '#f093fb', '#4facfe']
+                }
+            }];
+
+            const layout = {
+                margin: {t: 10, b: 10, l: 10, r: 10},
+                height: 250,
+                showlegend: true,
+                legend: {orientation: 'h', y: -0.1}
+            };
+
+            Plotly.newPlot('age-chart', data, layout, {responsive: true});
+        }
+
+        function createRaceDistributionChart(tractData) {
+            const races = {
+                'White': 'race_white_purchase',
+                'Black': 'race_black_purchase',
+                'Hispanic': 'race_hispanic_purchase',
+                'Asian': 'race_asian_purchase',
+                'Other': 'race_other_purchase'
+            };
+
+            const totals = Object.keys(races).map(label => {
+                return d3.sum(tractData, d => +(d[races[label]] || 0));
+            });
+
+            const total = d3.sum(totals);
+            const percentages = totals.map(t => (t / total * 100).toFixed(1));
+            
+            const maxIdx = percentages.indexOf(Math.max(...percentages));
+            const insight = percentages[maxIdx] > 50 ? 
+                `${Object.keys(races)[maxIdx]} 대출자가 전체의 ${percentages[maxIdx]}%로 압도적입니다.` :
+                "다양한 인종 그룹이 비교적 균등하게 분포되어 있습니다.";
+
+            const chartHtml = `
+                <div class="chart-card">
+                    <div class="chart-title">🌍 Race/Ethnicity Distribution</div>
+                    <div class="chart-insight">${insight}</div>
+                    <div id="race-chart"></div>
+                </div>
+            `;
+            
+            document.querySelector('.chart-grid').innerHTML += chartHtml;
+
+            const data = [{
+                type: 'bar',
+                x: Object.keys(races),
+                y: percentages,
+                text: percentages.map(p => p + '%'),
+                textposition: 'auto',
+                marker: {
+                    color: ['#4facfe', '#00f2fe', '#43e97b', '#38f9d7', '#fa709a'],
+                    line: {color: 'white', width: 1}
+                }
+            }];
+
+            const layout = {
+                margin: {t: 10, b: 40, l: 40, r: 10},
+                height: 250,
+                xaxis: {title: 'Race/Ethnicity'},
+                yaxis: {title: 'Percentage (%)', range: [0, Math.max(...percentages) * 1.2]}
+            };
+
+            Plotly.newPlot('race-chart', data, layout, {responsive: true});
+        }
+
+        function createIncomeDistributionChart(tractData) {
+            const incomes = {
+                'Very Low': 'income_verylow_purchase',
+                'Low': 'income_low_purchase',
+                'Moderate': 'income_moderate_purchase',
+                'High': 'income_high_purchase'
+            };
+
+            const totals = Object.keys(incomes).map(label => {
+                return d3.sum(tractData, d => +(d[incomes[label]] || 0));
+            });
+
+            const maxIdx = totals.indexOf(Math.max(...totals));
+            const insight = maxIdx < 2 ? 
+                "저소득층의 대출 접근성이 상대적으로 높습니다." :
+                "중고소득층이 주요 대출자 그룹을 형성합니다.";
+
+            const chartHtml = `
+                <div class="chart-card">
+                    <div class="chart-title">💵 Income Level Distribution</div>
+                    <div class="chart-insight">${insight}</div>
+                    <div id="income-chart"></div>
+                </div>
+            `;
+            
+            document.querySelector('.chart-grid').innerHTML += chartHtml;
+
+            const data = [{
+                type: 'bar',
+                x: Object.keys(incomes),
+                y: totals,
+                marker: {
+                    color: totals,
+                    colorscale: 'Viridis',
+                    showscale: false,
+                    line: {color: 'white', width: 1}
+                }
+            }];
+
+            const layout = {
+                margin: {t: 10, b: 40, l: 40, r: 10},
+                height: 250,
+                xaxis: {title: 'Income Level'},
+                yaxis: {title: 'Number of Loans'}
+            };
+
+            Plotly.newPlot('income-chart', data, layout, {responsive: true});
+        }
+    </script>
+</body>
+</html>
+
+

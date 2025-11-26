@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mortgage Inequality Explorer - Start</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 42px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .emoji {
+            font-size: 60px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .launch-btn {
+            display: block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 30px auto;
+            max-width: 400px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .launch-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .info-box {
+            background: #ecf0f1;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+
+        .info-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .info-text {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .feature {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .feature-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .feature-desc {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        code {
+            background: #2c3e50;
+            color: #f8f9fa;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="emoji">🏠</div>
+        <h1>Mortgage Inequality Explorer</h1>
+        <p class="subtitle">Interactive County-Level Loan Portfolio Analysis (2018-2023)</p>
+
+        <a href="interactive_dashboard.html" class="launch-btn">
+            🚀 Launch Dashboard
+        </a>
+
+        <div class="warning-box">
+            <strong>⚠️ Important:</strong> This dashboard requires a local server to work properly. 
+            If the dashboard doesn't load, please use the <code>start_dashboard.command</code> file.
+        </div>
+
+        <div class="info-box">
+            <div class="info-title">📖 How to Use</div>
+            <div class="info-text">
+                <strong>Method 1 (Easy):</strong><br>
+                1. Double-click <code>start_dashboard.command</code><br>
+                2. Browser will open automatically<br>
+                3. Press Ctrl+C in terminal to stop<br><br>
+
+                <strong>Method 2 (Manual):</strong><br>
+                1. Open Terminal in this folder<br>
+                2. Run: <code>python3 -m http.server 8888</code><br>
+                3. Visit: <code>http://localhost:8888/interactive_dashboard.html</code>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-title">🗺️ Interactive Map</div>
+                <div class="feature-desc">Click any county to view detailed statistics</div>
+            </div>
+            <div class="feature">
+                <div class="feature-title">💰 Loan Distribution</div>
+                <div class="feature-desc">Analyze loans by price range</div>
+            </div>
+            <div class="feature">
+                <div class="feature-title">👥 Demographics</div>
+                <div class="feature-desc">Age and race/ethnicity breakdown</div>
+            </div>
+            <div class="feature">
+                <div class="feature-title">💵 Income Analysis</div>
+                <div class="feature-desc">Distribution by income level</div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <div class="info-title">ℹ️ Why do I need a server?</div>
+            <div class="info-text">
+                For security reasons, browsers block direct file access (<code>file://</code>) 
+                from loading CSV data files. A local HTTP server (<code>http://</code>) 
+                solves this issue while keeping everything on your computer.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-check if server is available
+        fetch('county_data_2018_2023.csv', {method: 'HEAD'})
+            .then(response => {
+                if (response.ok) {
+                    console.log('✅ Server is running! Dashboard should work.');
+                } else {
+                    console.log('⚠️ Server may not be running properly.');
+                }
+            })
+            .catch(error => {
+                console.log('❌ No server detected. Please use start_dashboard.command');
+            });
+    </script>
+</body>
+</html>
+
