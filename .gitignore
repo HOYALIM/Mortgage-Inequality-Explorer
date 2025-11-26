@@ -1,5 +1,6 @@
-# Large data files
+# Large data files (uncompressed only)
 hmda_processed_2018_2023.csv
+!hmda_processed_2018_2023.csv.gz
 *.csv
 
 # Except these data files
