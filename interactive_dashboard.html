@@ -265,11 +265,564 @@
         .custom-legend { display: flex; justify-content: center; gap: 20px; margin-bottom: 15px; }
         .legend-item { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 0.9rem; }
         .dot { width: 12px; height: 12px; border-radius: 50%; }
+
+        /* Hook Section Styles */
+        .hook-container {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .hook-slides {
+            display: flex;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100vh;
+        }
+
+        .hook-slide {
+            min-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 40px;
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+
+        .hook-slide.and {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .hook-slide.but {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        .hook-slide.therefore {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .hook-slide.takeaway {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        .hook-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hook-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            opacity: 0.8;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .hook-title {
+            font-size: 4.2rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            line-height: 1.3;
+            min-height: 1.2em;
+        }
+
+        .but-word {
+            display: inline-block;
+            margin-right: 20px;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .hook-text {
+            font-size: 1.68rem;
+            line-height: 1.8;
+            opacity: 0.95;
+            margin-bottom: 40px;
+        }
+
+        /* Typing Effect */
+        .typing-text {
+            display: inline-block;
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1.2em;
+            background: white;
+            margin-left: 5px;
+            animation: blink 1s infinite;
+            vertical-align: baseline;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Stat Card Highlight Animation */
+        .stat-card.highlight {
+            animation: pulseHighlight 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseHighlight {
+            0%, 100% {
+                transform: translateY(-10px) scale(1.05);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            }
+            50% {
+                transform: translateY(-15px) scale(1.1);
+                box-shadow: 0 25px 50px rgba(255, 215, 0, 0.6);
+                border-color: #ffd700;
+            }
+        }
+
+        .hook-nav {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 1000;
+            font-size: 24px;
+            color: white;
+        }
+
+        .hook-nav:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .hook-nav.prev {
+            left: 30px;
+        }
+
+        .hook-nav.next {
+            right: 30px;
+        }
+
+        .hook-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .hook-dots {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .hook-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .hook-dot.active {
+            background: white;
+            width: 30px;
+            border-radius: 6px;
+        }
+
+        /* Number Cards in BUT Section */
+        .stat-cards {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 50px;
+            flex-wrap: nowrap;
+            align-items: stretch;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px 30px;
+            min-width: 280px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card.active {
+            transform: translateY(-15px) scale(1.1);
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .stat-number {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            opacity: 0.95;
+        }
+
+        /* Visualization Modal */
+        .viz-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s;
+        }
+
+        .viz-modal.active {
+            display: flex;
+        }
+
+        .viz-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 1040px;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            animation: scaleIn 0.3s;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .viz-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .viz-close:hover {
+            background: #c0392b;
+        }
+
+        .viz-chart {
+            width: 100%;
+            height: 520px;
+            margin-top: 20px;
+        }
+
+        .cta-button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .skip-hook {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            z-index: 1001;
+            transition: all 0.3s;
+        }
+
+        .skip-hook:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Responsive Design for Hook Section */
+        @media (max-width: 1200px) {
+            .hook-content {
+                max-width: 100%;
+                padding: 0 60px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hook-content {
+                padding: 0 30px;
+            }
+
+            .hook-title {
+                font-size: 2.8rem;
+                line-height: 1.3;
+            }
+
+            .hook-text {
+                font-size: 1.3rem;
+                line-height: 1.7;
+            }
+
+            .stat-cards {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .stat-card {
+                min-width: 100%;
+                max-width: 400px;
+            }
+
+            .hook-nav {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .hook-nav.prev {
+                left: 15px;
+            }
+
+            .hook-nav.next {
+                right: 15px;
+            }
+
+            .skip-hook {
+                top: 15px;
+                right: 15px;
+                padding: 10px 18px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hook-content {
+                padding: 0 20px;
+            }
+
+            .hook-title {
+                font-size: 2.2rem;
+                margin-bottom: 20px;
+            }
+
+            .hook-text {
+                font-size: 1.1rem;
+                margin-bottom: 30px;
+            }
+
+            .stat-card {
+                padding: 30px 20px;
+            }
+
+            .stat-number {
+                font-size: 2.8rem;
+            }
+
+            .stat-label {
+                font-size: 1rem;
+            }
+
+            .cta-button {
+                padding: 15px 30px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (min-width: 1400px) {
+            .hook-content {
+                max-width: 1400px;
+            }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
+<!-- Hook Section -->
+<div class="hook-container" id="hook-container">
+    <button class="skip-hook" onclick="skipHook()">Skip to Dashboard →</button>
+    
+    <div class="hook-slides" id="hook-slides">
+        <!-- Slide 1: AND -->
+        <div class="hook-slide and" data-slide="0">
+            <div class="hook-content">
+                <h1 class="hook-title">Owning a home is supposed to be simple.</h1>
+                <p class="hook-text">
+                    You find a place you love, you prove you can afford it,<br>
+                    and the bank applies the same rules to everyone.<br><br>
+                    <strong>That's how the mortgage system is supposed to work.</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 2: BUT -->
+        <div class="hook-slide but" data-slide="1">
+            <div class="hook-content">
+                <h1 class="hook-title">
+                    <span class="but-word">BUT!</span>
+                    <span class="typing-text" id="typing-text"></span><span class="typing-cursor" id="typing-cursor"></span>
+                </h1>
+                <p class="hook-text" id="but-description" style="display: none;">
+                    Across U.S. counties, loan approvals and amounts shift dramatically<br>
+                    with race, income, and age — even when families look similar on paper.
+                </p>
+                
+                <div class="stat-cards" id="stat-cards" style="opacity: 0;">
+                    <div class="stat-card" data-stat="gap" onclick="showViz('gap')">
+                        <div class="stat-number">30%</div>
+                        <div class="stat-label">White vs Black<br>homeownership gap</div>
+                    </div>
+                    <div class="stat-card" data-stat="denial" onclick="showViz('denial')">
+                        <div class="stat-number">2.5x</div>
+                        <div class="stat-label">Higher denial rates<br>for Black & Hispanic borrowers</div>
+                    </div>
+                    <div class="stat-card" data-stat="debt" onclick="showViz('debt')">
+                        <div class="stat-number">$13T+</div>
+                        <div class="stat-label">Mortgage debt —<br>largest U.S. household debt</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: THEREFORE -->
+        <div class="hook-slide therefore" data-slide="2">
+            <div class="hook-content">
+                <h1 class="hook-title">Therefore, we built the Mortgage Inequality Explorer.</h1>
+                <p class="hook-text">
+                    This explorable map lets you zoom into any U.S. county and see<br>
+                    who gets mortgage dollars — and who doesn't — by race, income, and age from 2018–2023.
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 4: TAKEAWAY -->
+        <div class="hook-slide takeaway" data-slide="3">
+            <div class="hook-content">
+                <h1 class="hook-title">The numbers tell a story of inequality.</h1>
+                <p class="hook-text" style="font-size: 1.6rem; line-height: 1.8;">
+                    Behind every mortgage approval or denial, there's a pattern.<br>
+                    Some communities face barriers that others don't.<br><br>
+                    <strong>Explore the data. See the patterns. Understand the reality.</strong>
+                </p>
+                <button class="cta-button" onclick="skipHook()">Start Exploring →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Arrows -->
+    <button class="hook-nav prev" id="prev-btn" onclick="changeSlide(-1)">←</button>
+    <button class="hook-nav next" id="next-btn" onclick="changeSlide(1)">→</button>
+
+    <!-- Dots Indicator -->
+    <div class="hook-dots">
+        <div class="hook-dot active" onclick="goToSlide(0)"></div>
+        <div class="hook-dot" onclick="goToSlide(1)"></div>
+        <div class="hook-dot" onclick="goToSlide(2)"></div>
+        <div class="hook-dot" onclick="goToSlide(3)"></div>
+    </div>
+</div>
+
+<!-- Visualization Modal -->
+<div class="viz-modal" id="viz-modal">
+    <div class="viz-content">
+        <button class="viz-close" onclick="closeViz()">×</button>
+        <h2 id="viz-title" style="margin-bottom: 20px; color: #2c3e50;"></h2>
+        <p id="viz-description" style="color: #7f8c8d; margin-bottom: 20px;"></p>
+        <div class="viz-chart" id="viz-chart"></div>
+    </div>
+</div>
+
+<div class="container" id="main-dashboard" style="display: none;">
     <div class="selector-section">
         <h1 class="header-title">Two Counties, Two Realities.<br>How Mortgage Outcomes Differ from <span class="county-name-target highlight-text"></span> to San Diego, CA?</h1>
         <p class="header-subtitle">Interactive Analysis: Select a State, then a County to compare</p>
@@ -517,6 +1070,394 @@
 </div>
 
 <script>
+    // --- Hook Section State ---
+    let currentSlide = 0;
+    const totalSlides = 4;
+
+    // --- Hook Navigation Functions ---
+    function changeSlide(direction) {
+        const newSlide = currentSlide + direction;
+        if (newSlide >= 0 && newSlide < totalSlides) {
+            goToSlide(newSlide);
+        } else if (newSlide >= totalSlides) {
+            // If trying to go past last slide, go to dashboard
+            skipHook();
+        }
+    }
+
+    function goToSlide(index) {
+        currentSlide = index;
+        const slides = document.getElementById('hook-slides');
+        slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+        
+        // Update dots
+        document.querySelectorAll('.hook-dot').forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentSlide);
+        });
+        
+        // Update nav buttons
+        document.getElementById('prev-btn').disabled = currentSlide === 0;
+        document.getElementById('next-btn').disabled = currentSlide === totalSlides - 1;
+
+        // Trigger BUT slide animations
+        if (index === 1) {
+            startButSlideAnimation();
+        } else {
+            // Reset BUT slide when leaving
+            const typingText = document.getElementById('typing-text');
+            const typingCursor = document.getElementById('typing-cursor');
+            const butDescription = document.getElementById('but-description');
+            const statCards = document.getElementById('stat-cards');
+            if (typingText) typingText.textContent = '';
+            if (typingCursor) typingCursor.style.display = 'none';
+            if (butDescription) butDescription.style.display = 'none';
+            if (statCards) {
+                statCards.style.opacity = '0';
+                statCards.querySelectorAll('.stat-card').forEach(card => {
+                    card.classList.remove('highlight');
+                });
+            }
+        }
+    }
+
+    function startButSlideAnimation() {
+        const typingText = document.getElementById('typing-text');
+        const typingCursor = document.getElementById('typing-cursor');
+        const butDescription = document.getElementById('but-description');
+        const statCards = document.getElementById('stat-cards');
+        
+        if (!typingText || !typingCursor) return;
+
+        // Reset
+        typingText.textContent = '';
+        typingCursor.style.display = 'inline-block';
+        butDescription.style.display = 'none';
+        statCards.style.opacity = '0';
+        
+        const fullText = " in the data, not all mortgages are treated equally.";
+        let charIndex = 0;
+        
+        function typeChar() {
+            if (charIndex < fullText.length) {
+                typingText.textContent += fullText[charIndex];
+                charIndex++;
+                setTimeout(typeChar, 50); // Typing speed
+            } else {
+                // Typing complete, show description and cards
+                setTimeout(() => {
+                    typingCursor.style.display = 'none';
+                    butDescription.style.display = 'block';
+                    butDescription.style.animation = 'fadeInUp 0.8s ease-out';
+                    
+                    // Fade in stat cards
+                    setTimeout(() => {
+                        statCards.style.transition = 'opacity 1s ease-in';
+                        statCards.style.opacity = '1';
+                        
+                        // Start highlighting cards one by one
+                        highlightCardsSequentially();
+                    }, 500);
+                }, 500);
+            }
+        }
+        
+        // Start typing after a brief delay
+        setTimeout(() => {
+            typeChar();
+        }, 300);
+    }
+
+    function highlightCardsSequentially() {
+        const cards = document.querySelectorAll('.stat-card');
+        let cardIndex = 0;
+        
+        function highlightNext() {
+            if (cardIndex < cards.length) {
+                // Remove highlight from all cards
+                cards.forEach(card => card.classList.remove('highlight'));
+                
+                // Add highlight to current card
+                cards[cardIndex].classList.add('highlight');
+                
+                cardIndex++;
+                
+                // Continue to next card after 2 seconds
+                setTimeout(highlightNext, 2000);
+            } else {
+                // After all cards highlighted, cycle through them
+                setTimeout(() => {
+                    cards.forEach((card, index) => {
+                        setTimeout(() => {
+                            cards.forEach(c => c.classList.remove('highlight'));
+                            card.classList.add('highlight');
+                        }, index * 2000);
+                    });
+                }, 1000);
+            }
+        }
+        
+        // Start highlighting after cards are visible
+        setTimeout(highlightNext, 500);
+    }
+
+    function skipHook() {
+        document.getElementById('hook-container').style.display = 'none';
+        document.getElementById('main-dashboard').style.display = 'block';
+        window.scrollTo(0, 0);
+    }
+
+    // --- Visualization Functions for BUT Section ---
+    function showViz(statType) {
+        const modal = document.getElementById('viz-modal');
+        const title = document.getElementById('viz-title');
+        const description = document.getElementById('viz-description');
+        const chartDiv = document.getElementById('viz-chart');
+        
+        // Remove active and highlight classes from all cards
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.classList.remove('active', 'highlight');
+        });
+        
+        // Add active class to clicked card
+        event.currentTarget.classList.add('active');
+        
+        let titleText, descText, chartData;
+        
+        switch(statType) {
+            case 'gap':
+                titleText = 'White vs Black Homeownership Gap';
+                descText = 'The 30 percentage point gap represents one of the most persistent inequalities in American housing. This visualization shows how this gap varies across different regions and income levels.';
+                chartData = createGapChart();
+                break;
+            case 'denial':
+                titleText = 'Mortgage Denial Rates by Race';
+                descText = 'Black and Hispanic borrowers face denial rates that are 2.5 times higher than White borrowers, even when controlling for income and credit scores. This chart breaks down the denial patterns across different demographics.';
+                chartData = createDenialChart();
+                break;
+            case 'debt':
+                titleText = 'U.S. Mortgage Debt Overview';
+                descText = 'At over $13 trillion, mortgage debt is the largest component of U.S. household debt. This visualization shows how this debt is distributed and how it has grown over time.';
+                chartData = createDebtChart();
+                break;
+        }
+        
+        title.textContent = titleText;
+        description.textContent = descText;
+        modal.classList.add('active');
+        
+        // Clear chart div
+        chartDiv.innerHTML = '';
+        
+        // Render chart with sequential animation based on type
+        setTimeout(() => {
+            if (statType === 'gap') {
+                animateGapChart(chartDiv, chartData);
+            } else if (statType === 'denial') {
+                animateDenialChart(chartDiv, chartData);
+            } else if (statType === 'debt') {
+                animateDebtChart(chartDiv, chartData);
+            } else {
+                Plotly.newPlot(chartDiv, chartData.data, chartData.layout, {responsive: true, displayModeBar: false});
+            }
+        }, 100);
+    }
+
+    function closeViz() {
+        document.getElementById('viz-modal').classList.remove('active');
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.classList.remove('active', 'highlight');
+        });
+    }
+
+    // --- Chart Creation Functions ---
+    function createGapChart() {
+        // Simulated data showing homeownership gap across income levels
+        const incomeLevels = ['Very Low', 'Low', 'Moderate', 'Middle', 'High'];
+        const whiteOwnership = [45, 55, 68, 78, 85];
+        const blackOwnership = [25, 32, 42, 52, 65];
+        const gap = whiteOwnership.map((w, i) => w - blackOwnership[i]);
+        
+        return {
+            incomeLevels,
+            whiteOwnership,
+            blackOwnership,
+            gap,
+            layout: {
+                title: 'Homeownership Gap by Income Level',
+                xaxis: { title: 'Income Level' },
+                yaxis: { title: 'Homeownership Rate (%)', range: [0, 100] },
+                yaxis2: {
+                    title: 'Gap (pp)',
+                    overlaying: 'y',
+                    side: 'right',
+                    range: [0, 40]
+                },
+                barmode: 'group',
+                legend: { x: 0.7, y: 1 },
+                margin: { t: 50, b: 50, l: 60, r: 60 }
+            }
+        };
+    }
+
+    function animateGapChart(chartDiv, chartData) {
+        const { incomeLevels, whiteOwnership, blackOwnership, gap, layout } = chartData;
+        
+        // Step 1: Show White bars first
+        Plotly.newPlot(chartDiv, [{
+            x: incomeLevels,
+            y: whiteOwnership,
+            name: 'White Homeownership %',
+            type: 'bar',
+            marker: { color: '#667eea' }
+        }], layout, {responsive: true, displayModeBar: false});
+        
+        // Step 2: Add Black bars after 800ms
+        setTimeout(() => {
+            Plotly.addTraces(chartDiv, {
+                x: incomeLevels,
+                y: blackOwnership,
+                name: 'Black Homeownership %',
+                type: 'bar',
+                marker: { color: '#e74c3c' }
+            });
+        }, 800);
+        
+        // Step 3: Add Gap line after 1600ms
+        setTimeout(() => {
+            Plotly.addTraces(chartDiv, {
+                x: incomeLevels,
+                y: gap,
+                name: 'Gap (percentage points)',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#ffd700', width: 3 },
+                marker: { size: 10, color: '#ffd700' },
+                yaxis: 'y2'
+            });
+        }, 1600);
+    }
+
+    function createDenialChart() {
+        const races = ['White', 'Black', 'Hispanic', 'Asian', 'Other'];
+        const denialRates = [8, 20, 18, 12, 15];
+        const colors = ['#667eea', '#e74c3c', '#f39c12', '#27ae60', '#9b59b6'];
+        
+        return {
+            races,
+            denialRates,
+            colors,
+            layout: {
+                title: 'Mortgage Denial Rates by Race/Ethnicity',
+                xaxis: { title: 'Race/Ethnicity' },
+                yaxis: { title: 'Denial Rate (%)', range: [0, 25] },
+                margin: { t: 50, b: 50, l: 60, r: 40 }
+            }
+        };
+    }
+
+    function animateDenialChart(chartDiv, chartData) {
+        const { races, denialRates, colors, layout } = chartData;
+        
+        // Initialize empty chart
+        Plotly.newPlot(chartDiv, [], layout, {responsive: true, displayModeBar: false});
+        
+        // Add bars one by one
+        races.forEach((race, index) => {
+            setTimeout(() => {
+                Plotly.addTraces(chartDiv, {
+                    x: [race],
+                    y: [denialRates[index]],
+                    type: 'bar',
+                    marker: { 
+                        color: colors[index],
+                        line: { color: '#fff', width: 2 }
+                    },
+                    text: [denialRates[index] + '%'],
+                    textposition: 'outside',
+                    name: race
+                });
+            }, index * 400); // 400ms delay between each bar
+        });
+    }
+
+    function createDebtChart() {
+        const years = [2018, 2019, 2020, 2021, 2022, 2023];
+        const mortgageDebt = [10.5, 10.8, 11.2, 11.8, 12.3, 13.1];
+        const totalDebt = [13.5, 14.0, 14.5, 15.2, 15.8, 16.5];
+        
+        return {
+            years,
+            mortgageDebt,
+            totalDebt,
+            layout: {
+                title: 'U.S. Household Debt Trends (Trillions $)',
+                xaxis: { title: 'Year' },
+                yaxis: { title: 'Debt (Trillions $)', range: [0, 18] },
+                legend: { x: 0.1, y: 0.9 },
+                margin: { t: 50, b: 50, l: 60, r: 40 }
+            }
+        };
+    }
+
+    function animateDebtChart(chartDiv, chartData) {
+        const { years, mortgageDebt, totalDebt, layout } = chartData;
+        
+        // Initialize with first year only
+        Plotly.newPlot(chartDiv, [{
+            x: [years[0]],
+            y: [mortgageDebt[0]],
+            name: 'Mortgage Debt',
+            type: 'scatter',
+            mode: 'lines+markers',
+            line: { color: '#667eea', width: 3 },
+            marker: { size: 10, color: '#667eea' },
+            fill: 'tozeroy',
+            fillcolor: 'rgba(102, 126, 234, 0.2)'
+        }], layout, {responsive: true, displayModeBar: false});
+        
+        // Add years progressively
+        for (let i = 1; i < years.length; i++) {
+            setTimeout(() => {
+                Plotly.extendTraces(chartDiv, {
+                    x: [[years[i]]],
+                    y: [[mortgageDebt[i]]]
+                }, [0]);
+            }, i * 300); // 300ms delay between each year
+        }
+        
+        // Add total debt line after mortgage debt is complete
+        setTimeout(() => {
+            Plotly.addTraces(chartDiv, {
+                x: years,
+                y: totalDebt,
+                name: 'Total Household Debt',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#95a5a6', width: 2, dash: 'dash' },
+                marker: { size: 8, color: '#95a5a6' }
+            });
+        }, years.length * 300 + 500);
+    }
+
+    // --- Keyboard Navigation for Hook Section ---
+    document.addEventListener('keydown', function(e) {
+        const hookContainer = document.getElementById('hook-container');
+        if (hookContainer && hookContainer.style.display !== 'none') {
+            if (e.key === 'ArrowLeft') {
+                changeSlide(-1);
+            } else if (e.key === 'ArrowRight') {
+                changeSlide(1);
+            } else if (e.key === 'Escape') {
+                closeViz();
+            }
+        }
+    });
+
+    // Initialize hook navigation
+    document.addEventListener('DOMContentLoaded', function() {
+        goToSlide(0);
+    });
+
     // --- Global State ---
     const SD_FIPS = "06073"; // San Diego County
     const DEFAULT_FIPS = null; // Suffolk County, MA (Boston)
