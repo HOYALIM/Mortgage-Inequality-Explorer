@@ -216,6 +216,45 @@
             position: relative;
         }
 
+        .interaction-panel {
+            background: var(--bg-light);
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .interaction-panel h4 {
+            margin-bottom: 10px;
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        .interaction-panel label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .interaction-panel input,
+        .interaction-panel select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .feedback-text {
+            font-size: 0.95rem;
+            color: #374151;
+            background: #f9fafb;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent);
+        }
+
         /* Hero Stats */
         .hero-stats {
             display: flex;
@@ -358,6 +397,12 @@
                 </div>
             </div>
             <div class="chart-container">
+                <div class="interaction-panel">
+                    <h4>Try your credit score</h4>
+                    <label for="loan-credit-input">Enter your credit score (300-850)</label>
+                    <input type="number" id="loan-credit-input" min="300" max="850" placeholder="e.g., 710">
+                    <p class="feedback-text" id="loan-feedback">Enter a credit score to see where your borrowing power fits across both counties.</p>
+                </div>
                 <div class="custom-legend">
                     <div class="legend-item"><div class="dot" style="background:var(--target-color)"></div><span class="county-name-target"></span></div>
                     <div class="legend-item"><div class="dot" style="background:var(--sd-color)"></div>San Diego</div>
@@ -392,6 +437,12 @@
                 </div>
             </div>
             <div class="chart-container">
+                <div class="interaction-panel">
+                    <h4>Enter your age</h4>
+                    <label for="age-input">How old are you?</label>
+                    <input type="number" id="age-input" min="18" max="100" placeholder="e.g., 32">
+                    <p class="feedback-text" id="age-feedback">Tell us your age to highlight where you sit in each county's borrower mix.</p>
+                </div>
                 <div class="custom-legend">
                     <div class="legend-item"><div class="dot" style="background:var(--target-color)"></div><span class="county-name-target"></span></div>
                     <div class="legend-item"><div class="dot" style="background:var(--sd-color)"></div>San Diego</div>
@@ -426,6 +477,17 @@
                 </div>
             </div>
             <div class="chart-container">
+                <div class="interaction-panel">
+                    <h4>Select your race/ethnicity</h4>
+                    <label for="race-select">Choose the group you identify with</label>
+                    <select id="race-select">
+                        <option value="White">White</option>
+                        <option value="African American">African American</option>
+                        <option value="Hispanic">Hispanic</option>
+                        <option value="Asian">Asian</option>
+                    </select>
+                    <p class="feedback-text" id="race-feedback">Pick a group to see how its share compares between the two counties.</p>
+                </div>
                 <div class="custom-legend">
                     <div class="legend-item"><div class="dot" style="background:var(--target-color)"></div><span class="county-name-target"></span></div>
                     <div class="legend-item"><div class="dot" style="background:var(--sd-color)"></div>San Diego</div>
@@ -460,6 +522,12 @@
                 </div>
             </div>
             <div class="chart-container">
+                <div class="interaction-panel">
+                    <h4>Estimate your household income</h4>
+                    <label for="income-input">Annual household income (USD)</label>
+                    <input type="number" id="income-input" min="10000" step="5000" placeholder="e.g., 85000">
+                    <p class="feedback-text" id="income-feedback">Enter your income to see which affordability band you align with in both counties.</p>
+                </div>
                 <div class="custom-legend">
                     <div class="legend-item"><div class="dot" style="background:var(--target-color)"></div><span class="county-name-target"></span></div>
                     <div class="legend-item"><div class="dot" style="background:var(--sd-color)"></div>San Diego</div>
@@ -477,6 +545,24 @@
                 </div>
                 <div class="soft-question">
                     As this heatmap transitions to San Diego County, which race income combinations shift the most?
+                </div>
+                <div class="interaction-panel">
+                    <h4>Personalize the intersection</h4>
+                    <label for="heatmap-race-select">Race/Ethnicity</label>
+                    <select id="heatmap-race-select">
+                        <option value="White">White</option>
+                        <option value="African American">African American</option>
+                        <option value="Hispanic">Hispanic</option>
+                        <option value="Asian">Asian</option>
+                    </select>
+                    <label for="heatmap-income-select">Income level</label>
+                    <select id="heatmap-income-select">
+                        <option value="Very Low">Very Low</option>
+                        <option value="Low">Low</option>
+                        <option value="Moderate">Moderate</option>
+                        <option value="High">High</option>
+                    </select>
+                    <p class="feedback-text" id="heatmap-feedback">Choose a race and income level to spotlight your position on the heatmap.</p>
                 </div>
                 <div style="margin-top: 20px; text-align: center;">
                     <p id="heatmap-status" style="margin-bottom: 5px; font-weight: bold;">Currently Viewing: <span class="county-name-target"></span></p>
@@ -519,15 +605,20 @@
 <script>
     // --- Global State ---
     const SD_FIPS = "06073"; // San Diego County
-    const DEFAULT_FIPS = null; // Suffolk County, MA (Boston)
+    const DEFAULT_FIPS = "25025"; // Suffolk County, MA (Boston)
     let currentYear = 2021;
     let selectedCountyFips = null;
     let currentView = 'usa';
-    let currentStateFips = null; 
+    let currentStateFips = null;
     let tractDataByYear = new Map();
     let stateNameByFips = new Map();
     let countyNameByFips = new Map();
-    let currentHeatmapMode = 'target'; 
+    let currentHeatmapMode = 'target';
+    let latestLoanBins = null;
+    let latestAgeStats = null;
+    let latestRaceStats = null;
+    let latestIncomeStats = null;
+    let latestHeatmap = null;
 
     // State FIPS mapping
     const stateFipsToAbbr = {
@@ -584,7 +675,8 @@
         });
 
         initControls(years);
-        renderUSAMap(); 
+        initInteractionInputs();
+        renderUSAMap();
         document.getElementById('loading').style.display = 'none';
 
         // --- LOAD DEFAULT: BOSTON (Suffolk, MA) ---
@@ -642,6 +734,22 @@
             if (stateFips) enterStateView(stateFips);
             else resetToUSA();
         });
+    }
+
+    function initInteractionInputs() {
+        const loanInput = document.getElementById('loan-credit-input');
+        const ageInput = document.getElementById('age-input');
+        const raceSelect = document.getElementById('race-select');
+        const incomeInput = document.getElementById('income-input');
+        const heatmapRaceSelect = document.getElementById('heatmap-race-select');
+        const heatmapIncomeSelect = document.getElementById('heatmap-income-select');
+
+        if (loanInput) loanInput.addEventListener('input', updateLoanInteraction);
+        if (ageInput) ageInput.addEventListener('input', updateAgeInteraction);
+        if (raceSelect) raceSelect.addEventListener('change', updateRaceInteraction);
+        if (incomeInput) incomeInput.addEventListener('input', updateIncomeInteraction);
+        if (heatmapRaceSelect) heatmapRaceSelect.addEventListener('change', updateHeatmapInteraction);
+        if (heatmapIncomeSelect) heatmapIncomeSelect.addEventListener('change', updateHeatmapInteraction);
     }
 
     // --- Map Logic ---
@@ -964,6 +1072,27 @@
         return stats;
     }
 
+    const getLoanBucketForScore = (score) => {
+        if (score < 580) return '$0-200k';
+        if (score < 670) return '$200k-400k';
+        if (score < 740) return '$400k-600k';
+        return '$600k+';
+    };
+
+    const getAgeBucket = (age) => {
+        if (age < 35) return '18-34';
+        if (age < 45) return '35-44';
+        if (age < 55) return '45-54';
+        return '55+';
+    };
+
+    const getIncomeBucket = (income) => {
+        if (income < 60000) return 'Very Low';
+        if (income < 95000) return 'Low';
+        if (income < 140000) return 'Moderate';
+        return 'High';
+    };
+
     function renderLoanChart(target, sd) {
         const binData = (data) => {
             const counts = [0, 0, 0, 0];
@@ -981,7 +1110,8 @@
         const targetVals = binData(target);
         const sdVals = binData(sd);
         const labels = ['$0-200k', '$200k-400k', '$400k-600k', '$600k+'];
-        drawComparisonBar('chart-loan', labels, targetVals, sdVals, 'Percentage of Loans');
+        latestLoanBins = { labels, target: targetVals, sd: sdVals };
+        updateLoanInteraction();
     }
 
     function renderAgeChart(target, sd) {
@@ -993,7 +1123,8 @@
         };
         const t = getAggregatedStats(target, map);
         const s = getAggregatedStats(sd, map);
-        drawComparisonBar('chart-age', Object.keys(map), Object.values(t), Object.values(s), 'Share of Borrowers');
+        latestAgeStats = { labels: Object.keys(map), target: Object.values(t), sd: Object.values(s) };
+        updateAgeInteraction();
     }
 
     function renderRaceChart(target, sd) {
@@ -1005,7 +1136,8 @@
         };
         const t = getAggregatedStats(target, map);
         const s = getAggregatedStats(sd, map);
-        drawComparisonBar('chart-race', Object.keys(map), Object.values(t), Object.values(s), 'Share of Borrowers');
+        latestRaceStats = { labels: Object.keys(map), target: Object.values(t), sd: Object.values(s) };
+        updateRaceInteraction();
     }
 
     function renderIncomeChart(target, sd) {
@@ -1017,10 +1149,11 @@
         };
         const t = getAggregatedStats(target, map);
         const s = getAggregatedStats(sd, map);
-        drawComparisonBar('chart-income', Object.keys(map), Object.values(t), Object.values(s), 'Share of Borrowers');
+        latestIncomeStats = { labels: Object.keys(map), target: Object.values(t), sd: Object.values(s) };
+        updateIncomeInteraction();
     }
 
-    function drawComparisonBar(divId, xLabels, targetY, sdY, yTitle) {
+    function drawComparisonBar(divId, xLabels, targetY, sdY, yTitle, highlightLabel = null) {
         const trace1 = {
             x: xLabels, y: targetY, name: 'Selected County', type: 'bar',
             marker: { color: '#54a0ff' }
@@ -1029,14 +1162,118 @@
             x: xLabels, y: sdY, name: 'San Diego', type: 'bar',
             marker: { color: '#ff9f43' }
         };
+
+        const traces = [trace1, trace2];
+
+        if (highlightLabel && xLabels.includes(highlightLabel)) {
+            const idx = xLabels.indexOf(highlightLabel);
+            traces.push({
+                x: [highlightLabel, highlightLabel],
+                y: [targetY[idx], sdY[idx]],
+                mode: 'markers+text',
+                marker: { color: '#e74c3c', size: 14, symbol: 'star' },
+                text: ['You', 'You'],
+                textposition: 'top center',
+                name: 'Your position',
+                hovertemplate: 'Your spot in %{x}<extra></extra>'
+            });
+        }
+
         const layout = {
             barmode: 'group',
             margin: { t: 20, b: 40, l: 40, r: 10 },
-            showlegend: false,
+            showlegend: true,
+            legend: { orientation: 'h', y: -0.15 },
             yaxis: { title: yTitle, ticksuffix: '%' },
             height: 350
         };
-        Plotly.newPlot(divId, [trace1, trace2], layout, { responsive: true, displayModeBar: false });
+        Plotly.newPlot(divId, traces, layout, { responsive: true, displayModeBar: false });
+    }
+
+    function updateLoanInteraction() {
+        if (!latestLoanBins) return;
+        const scoreInput = document.getElementById('loan-credit-input');
+        const feedback = document.getElementById('loan-feedback');
+        const score = parseInt(scoreInput?.value, 10);
+
+        const highlight = (!isNaN(score) && score >= 300 && score <= 850) ? getLoanBucketForScore(score) : null;
+        drawComparisonBar('chart-loan', latestLoanBins.labels, latestLoanBins.target, latestLoanBins.sd, 'Percentage of Loans', highlight);
+
+        if (!highlight) {
+            if (feedback) feedback.textContent = 'Enter a valid credit score to see which loan band you most likely fit into.';
+            return;
+        }
+
+        const idx = latestLoanBins.labels.indexOf(highlight);
+        const targetShare = latestLoanBins.target[idx].toFixed(1);
+        const sdShare = latestLoanBins.sd[idx].toFixed(1);
+        const countyLabel = countyNameByFips.get(selectedCountyFips) || 'your selected county';
+        if (feedback) {
+            feedback.textContent = `With a credit score of ${score}, borrowers often land in the ${highlight} band. In ${countyLabel}, ${targetShare}% of loans sit here versus ${sdShare}% in San Diego.`;
+        }
+    }
+
+    function updateAgeInteraction() {
+        if (!latestAgeStats) return;
+        const ageInput = document.getElementById('age-input');
+        const feedback = document.getElementById('age-feedback');
+        const age = parseInt(ageInput?.value, 10);
+
+        const highlight = (!isNaN(age) && age >= 18) ? getAgeBucket(age) : null;
+        drawComparisonBar('chart-age', latestAgeStats.labels, latestAgeStats.target, latestAgeStats.sd, 'Share of Borrowers', highlight);
+
+        if (!highlight) {
+            if (feedback) feedback.textContent = 'Add your age to spotlight the generation you fall into across both counties.';
+            return;
+        }
+
+        const idx = latestAgeStats.labels.indexOf(highlight);
+        const targetShare = latestAgeStats.target[idx].toFixed(1);
+        const sdShare = latestAgeStats.sd[idx].toFixed(1);
+        const countyLabel = countyNameByFips.get(selectedCountyFips) || 'your selected county';
+        if (feedback) {
+            feedback.textContent = `Age ${age} places you in the ${highlight} group. That slice makes up ${targetShare}% of borrowers in ${countyLabel} and ${sdShare}% in San Diego.`;
+        }
+    }
+
+    function updateRaceInteraction() {
+        if (!latestRaceStats) return;
+        const raceSelect = document.getElementById('race-select');
+        const feedback = document.getElementById('race-feedback');
+        const race = raceSelect?.value || 'White';
+
+        drawComparisonBar('chart-race', latestRaceStats.labels, latestRaceStats.target, latestRaceStats.sd, 'Share of Borrowers', race);
+
+        const idx = latestRaceStats.labels.indexOf(race);
+        const targetShare = latestRaceStats.target[idx].toFixed(1);
+        const sdShare = latestRaceStats.sd[idx].toFixed(1);
+        const countyLabel = countyNameByFips.get(selectedCountyFips) || 'your selected county';
+        if (feedback) {
+            feedback.textContent = `${race} borrowers represent ${targetShare}% of activity in ${countyLabel} versus ${sdShare}% in San Diego.`;
+        }
+    }
+
+    function updateIncomeInteraction() {
+        if (!latestIncomeStats) return;
+        const incomeInput = document.getElementById('income-input');
+        const feedback = document.getElementById('income-feedback');
+        const income = parseInt(incomeInput?.value, 10);
+
+        const highlight = (!isNaN(income) && income >= 0) ? getIncomeBucket(income) : null;
+        drawComparisonBar('chart-income', latestIncomeStats.labels, latestIncomeStats.target, latestIncomeStats.sd, 'Share of Borrowers', highlight);
+
+        if (!highlight) {
+            if (feedback) feedback.textContent = 'Enter your household income to see which affordability tier you match in each county.';
+            return;
+        }
+
+        const idx = latestIncomeStats.labels.indexOf(highlight);
+        const targetShare = latestIncomeStats.target[idx].toFixed(1);
+        const sdShare = latestIncomeStats.sd[idx].toFixed(1);
+        const countyLabel = countyNameByFips.get(selectedCountyFips) || 'your selected county';
+        if (feedback) {
+            feedback.textContent = `With an income around $${income.toLocaleString()}, you align with the ${highlight} group. That tier captures ${targetShare}% of loans in ${countyLabel} and ${sdShare}% in San Diego.`;
+        }
     }
 
     // --- Heatmap Logic ---
@@ -1078,6 +1315,13 @@
         const zNorm = zCounts.map(row => row.map(val => total > 0 ? (val / total * 100) : 0));
         const textValues = zNorm.map(row => row.map(val => val.toFixed(1) + '%'));
 
+        latestHeatmap = { races, incomes, zNorm, textValues };
+        updateHeatmapInteraction();
+    }
+
+    function drawHeatmapWithHighlight(race, income) {
+        if (!latestHeatmap) return;
+        const { races, incomes, zNorm, textValues } = latestHeatmap;
         const trace = {
             z: zNorm,
             x: incomes,
@@ -1085,20 +1329,54 @@
             type: 'heatmap',
             colorscale: 'Blues',
             xgap: 5, ygap: 5,
-            text: textValues, 
+            text: textValues,
             texttemplate: '<b>%{text}</b>',
             textfont: { family: 'Arial, sans-serif', size: 16, color: 'auto' },
             hovertemplate: 'Income: %{x}<br>Race: %{y}<br>Share: %{z:.1f}%<extra></extra>'
         };
 
+        const traces = [trace];
+        const raceIdx = races.indexOf(race);
+        const incomeIdx = incomes.indexOf(income);
+        if (raceIdx >= 0 && incomeIdx >= 0) {
+            traces.push({
+                x: [income],
+                y: [race],
+                mode: 'markers+text',
+                marker: { color: '#e74c3c', size: 18, symbol: 'star' },
+                text: ['You'],
+                textposition: 'middle center',
+                name: 'Your position',
+                hovertemplate: 'You: %{y} / %{x}<extra></extra>'
+            });
+        }
+
         const layout = {
             margin: { t: 20, b: 40, l: 140, r: 20 },
             height: 400,
             xaxis: { title: 'Income Level' },
-            yaxis: { title: 'Race' }
+            yaxis: { title: 'Race' },
+            showlegend: true,
+            legend: { orientation: 'h', y: -0.2 }
         };
 
-        Plotly.newPlot('chart-heatmap', [trace], layout, { responsive: true, displayModeBar: false });
+        Plotly.newPlot('chart-heatmap', traces, layout, { responsive: true, displayModeBar: false });
+
+        const feedback = document.getElementById('heatmap-feedback');
+        if (feedback && raceIdx >= 0 && incomeIdx >= 0) {
+            const share = zNorm[raceIdx][incomeIdx].toFixed(1);
+            const countyLabel = currentHeatmapMode === 'target' ? (countyNameByFips.get(selectedCountyFips) || 'Selected county') : 'San Diego County';
+            feedback.textContent = `In ${countyLabel}, ${race} borrowers in the ${income} income band make up ${share}% of recent loans.`;
+        }
+    }
+
+    function updateHeatmapInteraction() {
+        if (!latestHeatmap) return;
+        const raceSelect = document.getElementById('heatmap-race-select');
+        const incomeSelect = document.getElementById('heatmap-income-select');
+        const race = raceSelect?.value || latestHeatmap.races[0];
+        const income = incomeSelect?.value || latestHeatmap.incomes[0];
+        drawHeatmapWithHighlight(race, income);
     }
 
 </script>
